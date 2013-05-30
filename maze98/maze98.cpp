@@ -22,7 +22,6 @@ float x=0.0f, y=1.0f, z=5.0f;
 float deltaAngle = 0.0f;
 float deltaMove = 0;
 int xOrigin = -1;
-GLuint texture;
 
 GLuint LoadTexture( const char * filename )
 {
@@ -39,7 +38,7 @@ GLuint LoadTexture( const char * filename )
 
   if ( file == NULL ) return 0;
   width = 1024;
-  height = 512;
+  height = 1024;
   data = (unsigned char *)malloc( width * height * 3 );
   //int size = fseek(file,);
   fread( data, width * height * 3, 1, file );
@@ -194,6 +193,7 @@ void renderScene(void) {
 			0.0f, y,  0.0f);
 
 	// Draw texture
+    GLuint texture= LoadTexture( "wall.png" );
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture (GL_TEXTURE_2D, texture);
 	glBegin(GL_QUADS);
@@ -292,7 +292,6 @@ void mouseButton(int button, int state, int x, int y) {
 
 int main(int argc, char **argv) {
 	
-	texture= LoadTexture( "wall.jpg" );
 
 	
 
