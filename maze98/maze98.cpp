@@ -7,7 +7,7 @@
 #else
 #include <GL/glut.h>
 #endif
-
+#define PI 3.14159265
 // angle of rotation for the camera direction
 float angle = 0.0f;
 
@@ -22,12 +22,12 @@ float x=0.0f, y=1.0f, z=5.0f;
 float deltaAngle = 0.0f;
 float deltaMove = 0;
 int xOrigin = -1;
+GLuint texture;
+
+bool wasButtonReleased = true;
 
 GLuint LoadTexture( const char * filename )
 {
-
-  GLuint texture;
-
   int width, height;
 
   unsigned char * data;
@@ -169,10 +169,12 @@ void computePos(float deltaMove) {
 }
 
 void computeDir(float deltaAngle) {
-
-	angle += deltaAngle;
-	lx = sin(angle);
-	lz = -cos(angle);
+    if(wasButtonReleased == true) {
+	    angle += deltaAngle;
+	    lx = floor(sin(angle * PI/180) + .5);
+	    lz = floor(-cos(angle * PI/180) + .5);
+        wasButtonReleased = false;
+    }
 }
 
 void renderScene(void) {
@@ -193,7 +195,6 @@ void renderScene(void) {
 			0.0f, y,  0.0f);
 
 	// Draw texture
-    GLuint texture= LoadTexture( "wall.png" );
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture (GL_TEXTURE_2D, texture);
 	glBegin(GL_QUADS);
@@ -241,8 +242,8 @@ void pressKey(int key, int xx, int yy) {
        switch (key) {
              case GLUT_KEY_UP : deltaMove = 0.5f; break;
              case GLUT_KEY_DOWN : deltaMove = -0.5f; break;
-			 case GLUT_KEY_LEFT : deltaAngle = -0.01f; break;
-			 case GLUT_KEY_RIGHT : deltaAngle = 0.01f; break;
+			 case GLUT_KEY_LEFT : deltaAngle = -90.0f; break;
+			 case GLUT_KEY_RIGHT : deltaAngle = 90.0f; break;
 			 case GLUT_KEY_PAGE_UP : y+=0.1f; break;
 			 case GLUT_KEY_PAGE_DOWN : y-=0.1f; break;
 			 case GLUT_KEY_HOME : z++; break;
@@ -250,8 +251,8 @@ void pressKey(int key, int xx, int yy) {
        }
 } 
 
-void releaseKey(int key, int x, int y) { 	
-
+void releaseKey(int key, int x, int y) {
+    wasButtonReleased = true;
         switch (key) {
              case GLUT_KEY_UP :
              case GLUT_KEY_DOWN : deltaMove = 0;break;
@@ -303,6 +304,7 @@ int main(int argc, char **argv) {
 	glutCreateWindow("Maze 98");
 
 	// register callbacks
+    texture= LoadTexture( "wall.png" );
 	glutDisplayFunc(renderScene);
 	glutReshapeFunc(changeSize);
 	glutIdleFunc(renderScene);
