@@ -1,6 +1,15 @@
-#include <stdlib.h>
-#include <math.h>
-#include <fstream>
+#include<stdlib.h>
+#include<iostream>
+#include<fstream>
+#include<string>
+#include<sstream>
+#include<vector>
+#include<gl/glut.h>
+#include<gl/glu.h>
+#include<gl/gl.h>
+#include<math.h>
+#include<time.h>
+#include<random>
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -8,6 +17,121 @@
 #include <GL/glut.h>
 #endif
 #define PI 3.14159265
+
+using namespace std;
+
+struct Point {
+public:
+	int x;
+	int y;
+	Point(int x, int y) {
+		this->x = x;
+		this->y = y;
+	}
+	void set(int x, int y) {
+		this->x = x;
+		this->y = y;
+	}
+};
+
+struct Maze {
+public:
+	int size;
+	int** list;
+	Maze(int size) : size(10) {
+		this->size = size;
+		list = new int*[size];
+		for(int i = 0; i < size; i++)
+			list[i] = new int[size];
+	}
+	void Maze::generate() {
+		// Fill border of the maze
+		for(int i = 0; i < size; i++) {
+			for(int j = 0; j < size; j++) {
+				if (i == 0 || j == 0 || i == size-1 || j == size-1)
+					list[i][j] = 15;
+				else
+					list[i][j] = 15;
+			}
+		}
+		// Make walls inside the maze
+		vector<Point> visited;
+		Point* p = new Point(0,0);
+		//visited.push_back(p);
+
+		//int random = rand() % visited.size();
+		generateHelper(*p, &visited);
+	}
+	void generateHelper(Point& po, vector<Point>* visited) {
+		Point* current = &po;
+		vector<Point> neighbors = getNeighbors(list, *current);
+		cout << "current " << current->x << " " << current->y << endl;
+		visited->push_back(Point(current->x, current->y));
+
+		while (neighbors.size() > 0) {
+			int random = rand() % neighbors.size();
+			//cout << "rand " << random << endl;
+			int index = find(*visited, neighbors.at(random));
+			cout << "p " << neighbors.at(random).x << " " << neighbors.at(random).y << endl;
+			if (index != -1) {
+				neighbors.erase(neighbors.begin()+random);
+				//visited.erase(visited.begin()+index);
+			} else { // The cell haven't been visited
+				Point* p = &neighbors.at(random);
+				int x = p->x;
+				int y = p->y;
+				if (x > current->x) // east
+					list[current->y][current->x] = list[current->y][current->x] & 11; // OR with 1011
+				else if (x < current->x) // west
+					list[current->y][current->x] = list[current->y][current->x] & 14; // OR with 1110
+				else if (y > current->y) // north
+					list[current->y][current->x] = list[current->y][current->x] & 7; // OR with 0111
+				else if (y < current->y) // south
+					list[current->y][current->x] = list[current->y][current->x] & 13; // OR with 1101
+				cout << "list " << list[current->x][current->y] << " " << list[current->x][current->y] << endl;
+				
+				neighbors.erase(neighbors.begin()+random);
+				cout << "p2 " << x << " " << y << endl;
+				generateHelper(Point(x, y), visited);
+			}
+		}
+	}
+	int find(vector<Point>& visited, Point& p) {
+		for(int i = 0; i < visited.size(); i++)
+			if(visited.at(i).x == p.x && visited.at(i).y == p.y)
+				return i;
+		return -1;
+	}
+	vector<Point> Maze::getNeighbors(int** list, Point& p) {
+		int x = p.x;
+		int y = p.y;
+		vector<Point> neighbors;
+		if (x-1 >= 0)
+			neighbors.push_back(Point(x-1, y));
+		if (x+1 < this->size)
+			neighbors.push_back(Point(x+1, y));
+		if (y-1 >= 0)
+			neighbors.push_back(Point(x, y-1));
+		if (y+1 < this->size)
+			neighbors.push_back(Point(x, y+1));
+		
+		return neighbors;
+	}
+	void Maze::print() {
+		for(int i = 0; i < size; i++) {
+			for(int j = 0; j < size; j++) {
+				cout << list[i][j] << " ";
+			}
+			cout << endl;
+		}
+	}
+	~Maze() {
+		for(int i = 0; i < size; i++)
+			delete[] list[i];
+		delete[] list;
+	}
+};
+
 // angle of rotation for the camera direction
 float angle = 0.0f;
 
@@ -23,6 +147,10 @@ float deltaAngle = 0.0f;
 float deltaMove = 0;
 int xOrigin = -1;
 GLuint texture;
+float wallWidth = 10.0f, wallHeight = 3.0f;
+float wallThickness = 0.5f;
+int mazeSize = 10;
+Maze maze(mazeSize);
 
 bool wasButtonReleased = true;
 
@@ -198,10 +326,10 @@ void renderScene(void) {
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture (GL_TEXTURE_2D, texture);
 	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f, 100.0f);glVertex2f(0.0f,0.0f);
-	glTexCoord2f(100.0f, 100.0f);glVertex2f(100,0.0f);
-	glTexCoord2f(100.0f, 0.0f);glVertex2f(100,100);
-	glTexCoord2f(0.0f, 0.0f);glVertex2f(0.0f,100);
+	glTexCoord2f(0.0f, 2.0f);glVertex2f(0.0f,0.0f);
+	glTexCoord2f(2.0f, 2.0f);glVertex2f(2,0.0f);
+	glTexCoord2f(2.0f, 0.0f);glVertex2f(2,2);
+	glTexCoord2f(0.0f, 0.0f);glVertex2f(0.0f,2);
 	glEnd();
 
 // Draw ground
@@ -292,10 +420,6 @@ void mouseButton(int button, int state, int x, int y) {
 }
 
 int main(int argc, char **argv) {
-	
-
-	
-
 	// init GLUT and create window
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
@@ -320,6 +444,28 @@ int main(int argc, char **argv) {
 
 	// OpenGL init
 	glEnable(GL_DEPTH_TEST);
+
+	//maze.generate();
+	int a[] = {13, 9, 10, 12, 3, 10, 10, 10, 12, 13};
+	int b[] = {1,6,13,5,9,10,10,12,3,4};
+	int c[] = {5,9,6,3,2,12,13,1,14,5};
+	int d[] = {5, 5, 11, 12, 9, 6, 5, 5, 9, 6};
+	int e[] = {3, 6, 9, 6, 5, 9, 6, 5, 3, 12};
+	int f[] = {9, 12, 1, 8, 6, 5, 9, 6, 9, 6};
+	int g[] = {5, 7, 5, 1, 8, 6, 5, 9, 6, 13};
+	int h[] = {3, 10, 6, 5, 5, 13, 3, 6, 9, 4};
+	int i[] = {9, 10, 10, 4, 3, 6, 9, 10, 6, 5};
+	int j[] = {3, 10, 14, 3, 10, 8, 6, 11, 10, 6};
+	maze.list[0] = a;
+	maze.list[1] = b;
+	maze.list[2] = c;
+	maze.list[3] = d;
+	maze.list[4] = e;
+	maze.list[5] = f;
+	maze.list[6] = g;
+	maze.list[7] = h;
+	maze.list[8] = i;
+	maze.list[9] = j;
 
 	// enter GLUT event processing cycle
 	glutMainLoop();
