@@ -147,7 +147,7 @@ float deltaAngle = 0.0f;
 float deltaMove = 0;
 int xOrigin = -1;
 GLuint texture;
-float wallWidth = 10.0f, wallHeight = 3.0f;
+float wallWidth = 2.0f, wallHeight = 2.0f;
 float wallThickness = 0.5f;
 int mazeSize = 10;
 Maze maze(mazeSize);
@@ -318,11 +318,12 @@ void renderScene(void) {
 	// Reset transformations
 	glLoadIdentity();
 	// Set the camera
-	gluLookAt(	x, y, z,
+	gluLookAt(	x, 1, z,
 			x+lx, y,  z+lz,
-			0.0f, y,  0.0f);
+			0.0f, 1,  0.0f);
 
 	// Draw texture
+	/*
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture (GL_TEXTURE_2D, texture);
 	glBegin(GL_QUADS);
@@ -331,6 +332,119 @@ void renderScene(void) {
 	glTexCoord2f(2.0f, 0.0f);glVertex2f(2,2);
 	glTexCoord2f(0.0f, 0.0f);glVertex2f(0.0f,2);
 	glEnd();
+	*/
+	for(int i = 0; i < mazeSize; i++) {
+		for(int j = 0; j < mazeSize; j++) {
+			Point point(j*wallWidth, (maze.size-i)*wallWidth);
+
+			if ((maze.list[i][j] & 2) == 2) // OR with 1101 south
+			{
+				glColor3f(0.0f, 1.0f, 0.0f);
+				glBegin(GL_LINES);
+					glVertex2f(point.x, point.y);
+					glVertex2f(point.x+wallWidth, point.y);
+				glEnd();
+
+				glPushMatrix();
+				
+				glTranslatef(point.x, 0.0f, point.y);
+
+				glEnable(GL_TEXTURE_2D);
+				glBindTexture (GL_TEXTURE_2D, texture);
+				glBegin(GL_QUADS);
+				/*
+				glTexCoord2f(0.0f, 2.0f);glVertex2f(0.0f,0.0f);
+				glTexCoord2f(2.0f, 2.0f);glVertex2f(2,0.0f);
+				glTexCoord2f(2.0f, 0.0f);glVertex2f(2,2);
+				glTexCoord2f(0.0f, 0.0f);glVertex2f(0.0f,2);
+
+				*/
+				glTexCoord2f(0.0f, wallWidth);glVertex2f(0.0f,0.0f);
+				glTexCoord2f(wallWidth, wallWidth);glVertex2f(wallWidth,0.0f);
+				glTexCoord2f(wallWidth, 0.0f);glVertex2f(wallWidth,wallWidth);
+				glTexCoord2f(0.0f, 0.0f);glVertex2f(0.0f,wallWidth);
+				glEnd();
+
+				glPopMatrix();
+			}
+			if ((maze.list[i][j] & 8) == 8) // OR with 0111 north
+			{
+				glColor3f(1.0f, 0.0f, 0.0f);
+				glBegin(GL_LINES);
+					glVertex2f(point.x, point.y+wallWidth);
+					glVertex2f(point.x+wallWidth, point.y+wallWidth);
+				glEnd();
+
+				glPushMatrix();
+				
+				glTranslatef(point.x, 0.0f, point.y+wallWidth);
+
+				glEnable(GL_TEXTURE_2D);
+				glBindTexture (GL_TEXTURE_2D, texture);
+				glBegin(GL_QUADS);
+				glTexCoord2f(0.0f, wallWidth);glVertex2f(0.0f,0.0f);
+				glTexCoord2f(wallWidth, wallWidth);glVertex2f(wallWidth,0.0f);
+				glTexCoord2f(wallWidth, 0.0f);glVertex2f(wallWidth,wallWidth);
+				glTexCoord2f(0.0f, 0.0f);glVertex2f(0.0f,wallWidth);
+				glEnd();
+
+				glPopMatrix();
+			}
+			if ((maze.list[i][j] & 4) == 4) // OR with 1011 east
+			{
+				glColor3f(1.0f, 0.0f, 0.0f);
+				glBegin(GL_LINES);
+					glVertex2f(point.x+wallWidth, point.y+wallWidth);
+					glVertex2f(point.x+wallWidth, point.y);
+				glEnd();
+
+				/*
+				glPushMatrix();
+				glColor3f(1.0f, 0.0f, 0.0f);
+				glTranslatef(point.x, 0.0f, point.y);
+				glRotatef(90, 0.0f, 1.0f, 0.0f);
+
+				glEnable(GL_TEXTURE_2D);
+				glBindTexture (GL_TEXTURE_2D, texture);
+				glBegin(GL_QUADS);
+				glTexCoord2f(0.0f, wallWidth);glVertex2f(0.0f,0.0f);
+				glTexCoord2f(wallWidth, wallWidth);glVertex2f(wallWidth,0.0f);
+				glTexCoord2f(wallWidth, 0.0f);glVertex2f(wallWidth,wallWidth);
+				glTexCoord2f(0.0f, 0.0f);glVertex2f(0.0f,wallWidth);
+				glEnd();
+
+				glPopMatrix();
+				*/
+			}
+			if ((maze.list[i][j] & 1) == 1) // OR with 1110 west
+			{
+				glColor3f(1.0f, 0.0f, 0.0f);
+				glBegin(GL_LINES);
+					glVertex2f(point.x, point.y+wallWidth);
+					glVertex2f(point.x, point.y);
+				glEnd();
+
+				/*
+				glPushMatrix();
+				glColor3f(1.0f, 0.0f, 0.0f);
+				
+				glTranslatef(point.x+wallWidth, 0.0f, point.y);
+				glRotatef(90, 0.0f, 1.0f, 0.0f);
+
+				glEnable(GL_TEXTURE_2D);
+				glBindTexture (GL_TEXTURE_2D, texture);
+				glBegin(GL_QUADS);
+				glTexCoord2f(0.0f, wallWidth);glVertex2f(0.0f,0.0f);
+				glTexCoord2f(wallWidth, wallWidth);glVertex2f(wallWidth,0.0f);
+				glTexCoord2f(wallWidth, 0.0f);glVertex2f(wallWidth,wallWidth);
+				glTexCoord2f(0.0f, 0.0f);glVertex2f(0.0f,wallWidth);
+				glEnd();
+
+				glPopMatrix();
+				*/
+			}
+		}
+	}
 
 // Draw ground
 
@@ -446,6 +560,9 @@ int main(int argc, char **argv) {
 	glEnable(GL_DEPTH_TEST);
 
 	//maze.generate();
+	for(int i = 0; i < maze.size; i++)
+		delete[] maze.list[i];
+	delete[] maze.list;
 	int a[] = {13, 9, 10, 12, 3, 10, 10, 10, 12, 13};
 	int b[] = {1,6,13,5,9,10,10,12,3,4};
 	int c[] = {5,9,6,3,2,12,13,1,14,5};
@@ -466,6 +583,7 @@ int main(int argc, char **argv) {
 	maze.list[7] = h;
 	maze.list[8] = i;
 	maze.list[9] = j;
+	
 
 	// enter GLUT event processing cycle
 	glutMainLoop();
