@@ -154,8 +154,9 @@ int mazeSize = 10;
 Maze maze(mazeSize);
 
 // XZ position of the camera
-float x=wallWidth*5.5, y=1.0f, z=wallWidth/2;
-
+float x=wallWidth*5.5, y=1.0f, z=-wallWidth*1.5;
+Point current(0, 5);
+int dir = 2;
 bool wasButtonReleased = true;
 
 GLuint LoadTexture( const char * filename )
@@ -428,10 +429,21 @@ void processNormalKeys(unsigned char key, int xx, int yy) {
 } 
 
 void pressKey(int key, int xx, int yy) {
-
+	cout << "current " << current.x << ", " << current.y << endl;
        switch (key) {
-             case GLUT_KEY_UP : deltaMove = wallWidth; break;
-             case GLUT_KEY_DOWN : deltaMove = -wallWidth; break;
+		   
+             case GLUT_KEY_UP : 
+				 if ((maze.list[current.x][current.y] & 2) != 2) {
+					 deltaMove = wallWidth;
+					 current.y += 1;
+				 }
+				 break;
+             case GLUT_KEY_DOWN : 
+				 if ((maze.list[current.x][current.y] & 8) != 8) {
+					 deltaMove = -wallWidth;
+					 current.y -= 1;
+				 }
+				 break;
 			 case GLUT_KEY_LEFT : deltaAngle = -90.0f; break;
 			 case GLUT_KEY_RIGHT : deltaAngle = 90.0f; break;
 			 case GLUT_KEY_PAGE_UP : y+=0.5f; break;
@@ -506,9 +518,9 @@ int main(int argc, char **argv) {
 	glEnable(GL_DEPTH_TEST);
 
 	//maze.generate();
-	for(int i = 0; i < maze.size; i++)
-		delete[] maze.list[i];
-	delete[] maze.list;
+	//for(int i = 0; i < maze.size; i++)
+	//	delete[] maze.list[i];
+	//delete[] maze.list;
 	int a[] = {13, 9, 10, 12, 3, 10, 10, 10, 12, 13};
 	int b[] = {1,6,13,5,9,10,10,12,3,4};
 	int c[] = {5,9,6,3,2,12,13,1,14,5};
@@ -529,7 +541,6 @@ int main(int argc, char **argv) {
 	maze.list[7] = h;
 	maze.list[8] = i;
 	maze.list[9] = j;
-	
 
 	// enter GLUT event processing cycle
 	glutMainLoop();
