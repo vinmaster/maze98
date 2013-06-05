@@ -140,8 +140,7 @@ float angle = 0.0f;
 // actual vector representing the camera's direction
 float lx=0.0f,lz=-1.0f;
 
-// XZ position of the camera
-float x=0.0f, y=1.0f, z=2.0f;
+
 
 // the key states. These variables will be zero
 //when no key is being presses
@@ -154,6 +153,9 @@ float wallThickness = 0.5f;
 int mazeSize = 10;
 Maze maze(mazeSize);
 
+// XZ position of the camera
+float x=wallWidth*5.5, y=1.0f, z=wallWidth/2;
+
 bool wasButtonReleased = true;
 
 GLuint LoadTexture( const char * filename )
@@ -164,8 +166,8 @@ GLuint LoadTexture( const char * filename )
 
   FILE * file;
 
-  //file = fopen( filename, "rb" );
-  fopen_s(&file, filename, "rb" );
+  file = fopen( filename, "rb" );
+  //fopen_s(&file, filename, "rb" );
 
   if ( file == NULL ) return 0;
   width = 1024;
@@ -256,9 +258,9 @@ void drawSnowMan() {
 }
 
 void computePos(float deltaMove) {
-	if(wasButtonReleased) {
-		x += deltaMove * lx * 0.1f;
-		z += deltaMove * lz * 0.1f;
+	if(wasButtonReleased == true) {
+		x += deltaMove * lx * 1.0f;
+		z += deltaMove * lz * 1.0f;
 		wasButtonReleased = false;
 	}
 }
@@ -285,7 +287,7 @@ void renderScene(void) {
 	// Reset transformations
 	glLoadIdentity();
 	// Set the camera
-	x = wallWidth * 5.5;
+	
 	gluLookAt(	x, y, z,
 			x+lx, y,  z+lz,
 			0.0f, y,  0.0f);
@@ -441,9 +443,9 @@ void releaseKey(int key, int x, int y) {
     wasButtonReleased = true;
         switch (key) {
              case GLUT_KEY_UP :
-             case GLUT_KEY_DOWN :
+             case GLUT_KEY_DOWN : deltaMove = 0;break;
 			 case GLUT_KEY_LEFT :
-			 case GLUT_KEY_RIGHT : deltaAngle = 0;deltaMove = 0;break;
+			 case GLUT_KEY_RIGHT : deltaAngle = 0;break;
         }
 } 
 
