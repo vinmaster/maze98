@@ -140,8 +140,6 @@ float angle = 0.0f;
 // actual vector representing the camera's direction
 float lx=0.0f,lz=-1.0f;
 
-
-
 // the key states. These variables will be zero
 //when no key is being presses
 float deltaAngle = 0.0f;
@@ -155,8 +153,12 @@ Maze maze(mazeSize);
 
 // XZ position of the camera
 float x=wallWidth*5.5, y=1.0f, z=-wallWidth*1.5;
-Point current(0, 5);
-int dir = 2;
+Point current(9, 5);
+int SOUTH = 2; //1101
+int NORTH = 8; //0111
+int EAST = 4; //1011
+int WEST = 1; //1110
+int dir = NORTH;
 bool wasButtonReleased = true;
 
 GLuint LoadTexture( const char * filename )
@@ -302,19 +304,14 @@ void renderScene(void) {
 			if ((maze.list[i][j] & 2) == 2) // AND with 1101 south
 			{
 				glColor3f(0.0f, 1.0f, 0.0f);
-				glBegin(GL_LINES);
-					glVertex2f(point.x, point.y);
-					glVertex2f(point.x+wallWidth, point.y);
-				glEnd();
 
 				glPushMatrix();
-				
 				glTranslatef(point.x, 0.0f, -point.y);
 
 				glEnable(GL_TEXTURE_2D);
 				glBindTexture (GL_TEXTURE_2D, texture);
-				glBegin(GL_QUADS);
 
+				glBegin(GL_QUADS);
 				glTexCoord2f(0.0f, wallWidth);glVertex2f(0.0f,0.0f);
 				glTexCoord2f(wallWidth, wallWidth);glVertex2f(wallWidth,0.0f);
 				glTexCoord2f(wallWidth, 0.0f);glVertex2f(wallWidth,wallWidth);
@@ -326,17 +323,13 @@ void renderScene(void) {
 			if ((maze.list[i][j] & 8) == 8) // AND with 0111 north
 			{
 				glColor3f(1.0f, 0.0f, 0.0f);
-				glBegin(GL_LINES);
-					glVertex2f(point.x, point.y+wallWidth);
-					glVertex2f(point.x+wallWidth, point.y+wallWidth);
-				glEnd();
 
 				glPushMatrix();
-				
 				glTranslatef(point.x, 0.0f, -point.y-wallWidth);
 
 				glEnable(GL_TEXTURE_2D);
 				glBindTexture (GL_TEXTURE_2D, texture);
+
 				glBegin(GL_QUADS);
 				glTexCoord2f(0.0f, wallWidth);glVertex2f(0.0f,0.0f);
 				glTexCoord2f(wallWidth, wallWidth);glVertex2f(wallWidth,0.0f);
@@ -349,18 +342,14 @@ void renderScene(void) {
 			if ((maze.list[i][j] & 4) == 4) // AND with 1011 east
 			{
 				glColor3f(0.0f, 0.0f, 1.0f);
-				glBegin(GL_LINES);
-					glVertex2f(point.x+wallWidth, point.y+wallWidth);
-					glVertex2f(point.x+wallWidth, point.y);
-				glEnd();
 
-				
 				glPushMatrix();
 				glTranslatef(point.x+wallWidth, 0.0f, -point.y);
 				glRotatef(90, 0.0f, 1.0f, 0.0f);
 
 				glEnable(GL_TEXTURE_2D);
 				glBindTexture (GL_TEXTURE_2D, texture);
+
 				glBegin(GL_QUADS);
 				glTexCoord2f(0.0f, wallWidth);glVertex2f(0.0f,0.0f);
 				glTexCoord2f(wallWidth, wallWidth);glVertex2f(wallWidth,0.0f);
@@ -374,10 +363,6 @@ void renderScene(void) {
 			if ((maze.list[i][j] & 1) == 1) // AND with 1110 west
 			{
 				glColor3f(0.0f, 1.0f, 1.0f);
-				glBegin(GL_LINES);
-					glVertex2f(point.x, point.y+wallWidth);
-					glVertex2f(point.x, point.y);
-				glEnd();
 				
 				glPushMatrix();
 				glTranslatef(point.x, 0.0f, -point.y);
@@ -385,6 +370,7 @@ void renderScene(void) {
 
 				glEnable(GL_TEXTURE_2D);
 				glBindTexture (GL_TEXTURE_2D, texture);
+
 				glBegin(GL_QUADS);
 				glTexCoord2f(0.0f, wallWidth);glVertex2f(0.0f,0.0f);
 				glTexCoord2f(wallWidth, wallWidth);glVertex2f(wallWidth,0.0f);
@@ -430,22 +416,65 @@ void processNormalKeys(unsigned char key, int xx, int yy) {
 
 void pressKey(int key, int xx, int yy) {
 	cout << "current " << current.x << ", " << current.y << endl;
+	cout << "dir " << dir << endl;
+	cout << "block " << maze.list[current.x][current.y] << endl;
+	int oppositeDir = 0;
+	if (dir == SOUTH)
+		oppositeDir = NORTH;
+	else if(dir == NORTH)
+		oppositeDir = SOUTH;
+	else if(dir == EAST)
+		oppositeDir = WEST;
+	else if(dir == WEST)
+		oppositeDir = EAST;
        switch (key) {
 		   
              case GLUT_KEY_UP : 
-				 if ((maze.list[current.x][current.y] & 2) != 2) {
+				 if ((maze.list[current.x][current.y] & dir) != dir) {
+					 
+					 if(dir == NORTH && current.x > 0)
+						current.x -= 1;
+					 else if(dir == EAST && current.y < 9)
+						 current.y += 1;
+					 else if(dir == SOUTH && current.x < 9)
+						 current.x += 1;
+					 else if(dir == WEST && current.y > 0)
+						 current.y -= 1;
+					 else
+						 break;
 					 deltaMove = wallWidth;
-					 current.y += 1;
 				 }
 				 break;
              case GLUT_KEY_DOWN : 
-				 if ((maze.list[current.x][current.y] & 8) != 8) {
+				 
+				 if ((maze.list[current.x][current.y] & oppositeDir) != oppositeDir) {
+					 
+					 if(dir == NORTH && current.x < 9)
+						current.x += 1;
+					 else if(dir == EAST && current.y > 0)
+						 current.y -= 1;
+					 else if(dir == SOUTH && current.x > 0)
+						 current.x -= 1;
+					 else if(dir == WEST && current.y < 9)
+						 current.y += 1;
+					 else
+						 break;
 					 deltaMove = -wallWidth;
-					 current.y -= 1;
 				 }
 				 break;
-			 case GLUT_KEY_LEFT : deltaAngle = -90.0f; break;
-			 case GLUT_KEY_RIGHT : deltaAngle = 90.0f; break;
+			 case GLUT_KEY_LEFT : 
+				 deltaAngle = -90.0f;
+				 dir = dir << 1;
+				 if (dir > 8)
+					 dir = 1;
+				 
+				 break;
+			 case GLUT_KEY_RIGHT : 
+				 deltaAngle = 90.0f;
+				 dir = dir >> 1;
+				 if (dir == 0)
+					 dir = 8;
+				 break;
 			 case GLUT_KEY_PAGE_UP : y+=0.5f; break;
 			 case GLUT_KEY_PAGE_DOWN : y-=0.5f; break;
        }
@@ -522,14 +551,14 @@ int main(int argc, char **argv) {
 	//	delete[] maze.list[i];
 	//delete[] maze.list;
 	int a[] = {13, 9, 10, 12, 3, 10, 10, 10, 12, 13};
-	int b[] = {1,6,13,5,9,10,10,12,3,4};
-	int c[] = {5,9,6,3,2,12,13,1,14,5};
+	int b[] = {1, 6, 13, 5, 9, 10, 10, 12, 3, 4};
+	int c[] = {5, 9, 6, 3, 2, 12, 13, 1, 14, 5};
 	int d[] = {5, 5, 11, 12, 9, 6, 5, 5, 9, 6};
 	int e[] = {3, 6, 9, 6, 5, 9, 6, 5, 3, 12};
-	int f[] = {9, 12, 1, 8, 6, 5, 9, 6, 9, 6};
-	int g[] = {5, 7, 5, 1, 8, 6, 5, 9, 6, 13};
-	int h[] = {3, 10, 6, 5, 5, 13, 3, 6, 9, 4};
-	int i[] = {9, 10, 10, 4, 3, 6, 9, 10, 6, 5};
+	int f[] = {9, 12, 1,  8, 6, 5, 9, 6, 9, 6};
+	int g[] = {5, 7,  5,  1, 8, 6,  5, 9,  6, 13};
+	int h[] = {3, 10, 6,  5, 5, 13, 3, 6,  9, 4};
+	int i[] = {9, 10, 10, 4, 3,  6, 9, 10, 6,  5};
 	int j[] = {3, 10, 14, 3, 10, 8, 6, 11, 10, 6};
 	maze.list[0] = a;
 	maze.list[1] = b;
