@@ -318,9 +318,9 @@ void renderScene(void) {
 	// Reset transformations
 	glLoadIdentity();
 	// Set the camera
-	gluLookAt(	x, 1, z,
+	gluLookAt(	x, 30, z,
 			x+lx, y,  z+lz,
-			0.0f, 1,  0.0f);
+			1.0f, 0,  0.0f);
 
 	// Draw texture
 	/*
@@ -347,7 +347,7 @@ void renderScene(void) {
 
 				glPushMatrix();
 				
-				glTranslatef(point.x, 0.0f, point.y);
+				glTranslatef(point.x, 0.0f, -point.y);
 
 				glEnable(GL_TEXTURE_2D);
 				glBindTexture (GL_TEXTURE_2D, texture);
@@ -377,7 +377,7 @@ void renderScene(void) {
 
 				glPushMatrix();
 				
-				glTranslatef(point.x, 0.0f, point.y+wallWidth);
+				glTranslatef(point.x, 0.0f, -point.y-wallWidth);
 
 				glEnable(GL_TEXTURE_2D);
 				glBindTexture (GL_TEXTURE_2D, texture);
@@ -392,16 +392,15 @@ void renderScene(void) {
 			}
 			if ((maze.list[i][j] & 4) == 4) // OR with 1011 east
 			{
-				glColor3f(1.0f, 0.0f, 0.0f);
+				glColor3f(0.0f, 0.0f, 1.0f);
 				glBegin(GL_LINES);
 					glVertex2f(point.x+wallWidth, point.y+wallWidth);
 					glVertex2f(point.x+wallWidth, point.y);
 				glEnd();
 
-				/*
+				
 				glPushMatrix();
-				glColor3f(1.0f, 0.0f, 0.0f);
-				glTranslatef(point.x, 0.0f, point.y);
+				glTranslatef(point.x+wallWidth, 0.0f, -point.y);
 				glRotatef(90, 0.0f, 1.0f, 0.0f);
 
 				glEnable(GL_TEXTURE_2D);
@@ -414,21 +413,18 @@ void renderScene(void) {
 				glEnd();
 
 				glPopMatrix();
-				*/
+				
 			}
 			if ((maze.list[i][j] & 1) == 1) // OR with 1110 west
 			{
-				glColor3f(1.0f, 0.0f, 0.0f);
+				glColor3f(0.0f, 1.0f, 1.0f);
 				glBegin(GL_LINES);
 					glVertex2f(point.x, point.y+wallWidth);
 					glVertex2f(point.x, point.y);
 				glEnd();
-
-				/*
-				glPushMatrix();
-				glColor3f(1.0f, 0.0f, 0.0f);
 				
-				glTranslatef(point.x+wallWidth, 0.0f, point.y);
+				glPushMatrix();
+				glTranslatef(point.x, 0.0f, -point.y);
 				glRotatef(90, 0.0f, 1.0f, 0.0f);
 
 				glEnable(GL_TEXTURE_2D);
@@ -441,7 +437,7 @@ void renderScene(void) {
 				glEnd();
 
 				glPopMatrix();
-				*/
+				
 			}
 		}
 	}
