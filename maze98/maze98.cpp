@@ -81,13 +81,13 @@ public:
 				int x = p->x;
 				int y = p->y;
 				if (x > current->x) // east
-					list[current->y][current->x] = list[current->y][current->x] & 11; // OR with 1011
+					list[current->y][current->x] = list[current->y][current->x] & 11; // AND with 1011
 				else if (x < current->x) // west
-					list[current->y][current->x] = list[current->y][current->x] & 14; // OR with 1110
+					list[current->y][current->x] = list[current->y][current->x] & 14; // AND with 1110
 				else if (y > current->y) // north
-					list[current->y][current->x] = list[current->y][current->x] & 7; // OR with 0111
+					list[current->y][current->x] = list[current->y][current->x] & 7; // AND with 0111
 				else if (y < current->y) // south
-					list[current->y][current->x] = list[current->y][current->x] & 13; // OR with 1101
+					list[current->y][current->x] = list[current->y][current->x] & 13; // AND with 1101
 				cout << "list " << list[current->x][current->y] << " " << list[current->x][current->y] << endl;
 				
 				neighbors.erase(neighbors.begin()+random);
@@ -97,7 +97,7 @@ public:
 		}
 	}
 	int find(vector<Point>& visited, Point& p) {
-		for(int i = 0; i < visited.size(); i++)
+		for(int i = 0; i < (int)visited.size(); i++)
 			if(visited.at(i).x == p.x && visited.at(i).y == p.y)
 				return i;
 		return -1;
@@ -126,9 +126,11 @@ public:
 		}
 	}
 	~Maze() {
+		/*
 		for(int i = 0; i < size; i++)
 			delete[] list[i];
 		delete[] list;
+		*/
 	}
 };
 
@@ -139,7 +141,7 @@ float angle = 0.0f;
 float lx=0.0f,lz=-1.0f;
 
 // XZ position of the camera
-float x=0.0f, y=1.0f, z=5.0f;
+float x=0.0f, y=1.0f, z=2.0f;
 
 // the key states. These variables will be zero
 //when no key is being presses
@@ -162,7 +164,8 @@ GLuint LoadTexture( const char * filename )
 
   FILE * file;
 
-  file = fopen( filename, "rb" );
+  //file = fopen( filename, "rb" );
+  fopen_s(&file, filename, "rb" );
 
   if ( file == NULL ) return 0;
   width = 1024;
@@ -252,48 +255,12 @@ void drawSnowMan() {
 	glutSolidCone(0.08f,0.5f,10,2);
 }
 
-void drawWall() {
-	float wallWidth = 3.0f, wallHeight = 3.0f;
-	float wallThickness = 0.5f;
-
-	// Front
-	glPushMatrix();
-	glColor3f(1.0f, 0.0f, 0.0f);
-	glScalef(2.0f, 1.0f, 1.0f);
-	glRectf(0.0f, 0.0f, wallWidth, wallHeight);
-
-	glTranslatef(0.0f, 1.0f, 0.0f);
-	glColor3f(1.0f, 1.0f, 1.0f);
-	glRectf(0.0f, 0.0f, wallWidth, 0.1f);
-	glPopMatrix();
-
-	// Left side
-	glPushMatrix();
-	glColor3f(1.0f, 0.0f, 0.0f);
-	glRotatef(90, 0.0f, 1.0f, 0.0f);
-	glRectf(0.0f, 0.0f, wallThickness, wallHeight);
-	glPopMatrix();
-
-	// Right side
-	glPushMatrix();
-	glColor3f(1.0f, 0.0f, 0.0f);
-	glTranslatef(wallWidth, 0.0f, 0.0f);
-	glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-	glRectf(0.0f, 0.0f, wallThickness, wallHeight);
-	glPopMatrix();
-
-	// Back
-	glPushMatrix();
-	glColor3f(1.0f, 0.0f, 0.0f);
-	glTranslatef(0.0f, 0.0f, -wallThickness);
-	glRectf(0.0f, 0.0f, wallWidth, wallHeight);
-	glPopMatrix();
-}
-
 void computePos(float deltaMove) {
-
-	x += deltaMove * lx * 0.1f;
-	z += deltaMove * lz * 0.1f;
+	if(wasButtonReleased) {
+		x += deltaMove * lx * 0.1f;
+		z += deltaMove * lz * 0.1f;
+		wasButtonReleased = false;
+	}
 }
 
 void computeDir(float deltaAngle) {
@@ -318,26 +285,18 @@ void renderScene(void) {
 	// Reset transformations
 	glLoadIdentity();
 	// Set the camera
-	gluLookAt(	x, 30, z,
+	x = wallWidth * 5.5;
+	gluLookAt(	x, y, z,
 			x+lx, y,  z+lz,
-			1.0f, 0,  0.0f);
+			0.0f, y,  0.0f);
 
-	// Draw texture
-	/*
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture (GL_TEXTURE_2D, texture);
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f, 2.0f);glVertex2f(0.0f,0.0f);
-	glTexCoord2f(2.0f, 2.0f);glVertex2f(2,0.0f);
-	glTexCoord2f(2.0f, 0.0f);glVertex2f(2,2);
-	glTexCoord2f(0.0f, 0.0f);glVertex2f(0.0f,2);
-	glEnd();
-	*/
+	// Draw walls
+
 	for(int i = 0; i < mazeSize; i++) {
 		for(int j = 0; j < mazeSize; j++) {
 			Point point(j*wallWidth, (maze.size-i)*wallWidth);
 
-			if ((maze.list[i][j] & 2) == 2) // OR with 1101 south
+			if ((maze.list[i][j] & 2) == 2) // AND with 1101 south
 			{
 				glColor3f(0.0f, 1.0f, 0.0f);
 				glBegin(GL_LINES);
@@ -352,13 +311,7 @@ void renderScene(void) {
 				glEnable(GL_TEXTURE_2D);
 				glBindTexture (GL_TEXTURE_2D, texture);
 				glBegin(GL_QUADS);
-				/*
-				glTexCoord2f(0.0f, 2.0f);glVertex2f(0.0f,0.0f);
-				glTexCoord2f(2.0f, 2.0f);glVertex2f(2,0.0f);
-				glTexCoord2f(2.0f, 0.0f);glVertex2f(2,2);
-				glTexCoord2f(0.0f, 0.0f);glVertex2f(0.0f,2);
 
-				*/
 				glTexCoord2f(0.0f, wallWidth);glVertex2f(0.0f,0.0f);
 				glTexCoord2f(wallWidth, wallWidth);glVertex2f(wallWidth,0.0f);
 				glTexCoord2f(wallWidth, 0.0f);glVertex2f(wallWidth,wallWidth);
@@ -367,7 +320,7 @@ void renderScene(void) {
 
 				glPopMatrix();
 			}
-			if ((maze.list[i][j] & 8) == 8) // OR with 0111 north
+			if ((maze.list[i][j] & 8) == 8) // AND with 0111 north
 			{
 				glColor3f(1.0f, 0.0f, 0.0f);
 				glBegin(GL_LINES);
@@ -390,7 +343,7 @@ void renderScene(void) {
 
 				glPopMatrix();
 			}
-			if ((maze.list[i][j] & 4) == 4) // OR with 1011 east
+			if ((maze.list[i][j] & 4) == 4) // AND with 1011 east
 			{
 				glColor3f(0.0f, 0.0f, 1.0f);
 				glBegin(GL_LINES);
@@ -415,7 +368,7 @@ void renderScene(void) {
 				glPopMatrix();
 				
 			}
-			if ((maze.list[i][j] & 1) == 1) // OR with 1110 west
+			if ((maze.list[i][j] & 1) == 1) // AND with 1110 west
 			{
 				glColor3f(0.0f, 1.0f, 1.0f);
 				glBegin(GL_LINES);
@@ -452,9 +405,6 @@ void renderScene(void) {
 		glVertex3f( 100.0f, 0.0f, -100.0f);
 	glEnd();
 
-	// Draw walls
-	//drawWall();
-
 // Draw 36 SnowMen
 
 	for(int i = -3; i < 3; i++)
@@ -478,24 +428,22 @@ void processNormalKeys(unsigned char key, int xx, int yy) {
 void pressKey(int key, int xx, int yy) {
 
        switch (key) {
-             case GLUT_KEY_UP : deltaMove = 0.5f; break;
-             case GLUT_KEY_DOWN : deltaMove = -0.5f; break;
+             case GLUT_KEY_UP : deltaMove = wallWidth; break;
+             case GLUT_KEY_DOWN : deltaMove = -wallWidth; break;
 			 case GLUT_KEY_LEFT : deltaAngle = -90.0f; break;
 			 case GLUT_KEY_RIGHT : deltaAngle = 90.0f; break;
-			 case GLUT_KEY_PAGE_UP : y+=0.1f; break;
-			 case GLUT_KEY_PAGE_DOWN : y-=0.1f; break;
-			 case GLUT_KEY_HOME : z++; break;
-			 case GLUT_KEY_END : z--; break;
+			 case GLUT_KEY_PAGE_UP : y+=0.5f; break;
+			 case GLUT_KEY_PAGE_DOWN : y-=0.5f; break;
        }
-} 
+}
 
 void releaseKey(int key, int x, int y) {
     wasButtonReleased = true;
         switch (key) {
              case GLUT_KEY_UP :
-             case GLUT_KEY_DOWN : deltaMove = 0;break;
+             case GLUT_KEY_DOWN :
 			 case GLUT_KEY_LEFT :
-			 case GLUT_KEY_RIGHT : deltaAngle = 0;break;
+			 case GLUT_KEY_RIGHT : deltaAngle = 0;deltaMove = 0;break;
         }
 } 
 
@@ -549,8 +497,8 @@ int main(int argc, char **argv) {
 	glutSpecialUpFunc(releaseKey);
 
 	// here are the two new functions
-	glutMouseFunc(mouseButton);
-	glutMotionFunc(mouseMove);
+	//glutMouseFunc(mouseButton);
+	//glutMotionFunc(mouseMove);
 
 	// OpenGL init
 	glEnable(GL_DEPTH_TEST);
@@ -583,6 +531,7 @@ int main(int argc, char **argv) {
 
 	// enter GLUT event processing cycle
 	glutMainLoop();
+	delete[] maze.list;
 
 	return 1;
 }
