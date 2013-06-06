@@ -160,6 +160,8 @@ int EAST = 4; //1011
 int WEST = 1; //1110
 int dir = NORTH;
 bool wasButtonReleased = true;
+float r, g, b;
+bool randomColorMode = false;
 
 GLuint LoadTexture( const char * filename )
 {
@@ -303,7 +305,15 @@ void renderScene(void) {
 
 			if ((maze.list[i][j] & 2) == 2) // AND with 1101 south
 			{
-				glColor3f(0.0f, 1.0f, 0.0f);
+				if(randomColorMode) {
+					float r, g, b;
+					r = rand() % 100;
+					g = rand() % 100;
+					b = rand() % 100;
+					glColor3f(r/100, g/100, b/100);
+				}
+				else
+					glColor3f(0.0f, 1.0f, 0.0f);
 
 				glPushMatrix();
 				glTranslatef(point.x, 0.0f, -point.y);
@@ -322,7 +332,15 @@ void renderScene(void) {
 			}
 			if ((maze.list[i][j] & 8) == 8) // AND with 0111 north
 			{
-				glColor3f(1.0f, 0.0f, 0.0f);
+				if(randomColorMode) {
+					float r, g, b;
+					r = rand() % 100;
+					g = rand() % 100;
+					b = rand() % 100;
+					glColor3f(r/100, g/100, b/100);
+				}
+				else
+					glColor3f(1.0f, 0.0f, 0.0f);
 
 				glPushMatrix();
 				glTranslatef(point.x, 0.0f, -point.y-wallWidth);
@@ -341,7 +359,15 @@ void renderScene(void) {
 			}
 			if ((maze.list[i][j] & 4) == 4) // AND with 1011 east
 			{
-				glColor3f(0.0f, 0.0f, 1.0f);
+				if(randomColorMode) {
+					float r, g, b;
+					r = rand() % 100;
+					g = rand() % 100;
+					b = rand() % 100;
+					glColor3f(r/100, g/100, b/100);
+				}
+				else
+					glColor3f(0.0f, 0.0f, 1.0f);
 
 				glPushMatrix();
 				glTranslatef(point.x+wallWidth, 0.0f, -point.y);
@@ -362,7 +388,15 @@ void renderScene(void) {
 			}
 			if ((maze.list[i][j] & 1) == 1) // AND with 1110 west
 			{
-				glColor3f(0.0f, 1.0f, 1.0f);
+				if(randomColorMode) {
+					float r, g, b;
+					r = rand() % 100;
+					g = rand() % 100;
+					b = rand() % 100;
+					glColor3f(r/100, g/100, b/100);
+				}
+				else
+					glColor3f(0.0f, 1.0f, 1.0f);
 				
 				glPushMatrix();
 				glTranslatef(point.x, 0.0f, -point.y);
@@ -410,14 +444,20 @@ void renderScene(void) {
 
 void processNormalKeys(unsigned char key, int xx, int yy) { 	
 
-        if (key == 27)
+        if (key == 27 || key == 'q')
               exit(0);
+		else if (key == 'w')
+			randomColorMode = true;
+		else if (key == 'e')
+			randomColorMode = false;
 } 
 
 void pressKey(int key, int xx, int yy) {
+	/*
 	cout << "current " << current.x << ", " << current.y << endl;
 	cout << "dir " << dir << endl;
 	cout << "block " << maze.list[current.x][current.y] << endl;
+	*/
 	int oppositeDir = 0;
 	if (dir == SOUTH)
 		oppositeDir = NORTH;
@@ -546,6 +586,13 @@ int main(int argc, char **argv) {
 	// OpenGL init
 	glEnable(GL_DEPTH_TEST);
 
+	cout << "Arrow keys to move:" << endl;
+	cout << "\tUP - Forward" << endl;
+	cout << "\tDOWN - Back" << endl;
+	cout << "\tLEFT - Turn left" << endl;
+	cout << "\tRIGHT - Turn Right" << endl;
+	cout << "W - Random Color Mode" << endl;
+	cout << "E - Turn off Random Color Mode" << endl;
 	//maze.generate();
 	//for(int i = 0; i < maze.size; i++)
 	//	delete[] maze.list[i];
